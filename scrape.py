@@ -16,7 +16,7 @@ fixedwhat = what.replace(' ', '+')
 name_list = []
 phone_list = []
 
-x=1
+x=0
 for run_10 in range (10):
     x = x + 1
     url = f'https://www.yellowpages.com/search?search_terms={fixedwhat}&geo_location_terms={where}&page={x}'
