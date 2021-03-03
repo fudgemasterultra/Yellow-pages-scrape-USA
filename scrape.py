@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import requests
 import numpy as np
 import re
+
 #Get user input
 what = input('What industry are you looking to get numbers for?')
 where = input('give me a zip code')
@@ -15,7 +16,7 @@ fixedwhat = what.replace(' ', '+')
 #lists that will be amendided as needed
 name_list = []
 phone_list = []
-
+address = []
 x=0
 for run_10 in range (10):
     x = x + 1
@@ -30,6 +31,10 @@ for run_10 in range (10):
         #Declaring global varibles
         global wo_span_name
         global wo_div_phone
+        global wo_dive_adress_fl
+        global wo_dive_adress_sl
+        global full_adress
+        full_adress = None
         #grab name
         w_span_name = findcard.find('a', class_='business-name')
         wo_span_name = w_span_name.text
@@ -39,21 +44,32 @@ for run_10 in range (10):
         w1_div_phone = str(w_div_phone)
         wo_div_phone = re.sub('\D', '', w1_div_phone)
 
-
-        phone_list.append(wo_div_phone)
-        name_list.append(wo_span_name)
+        #Grab adress
+        try:
+            w_dive_adress_fl = findcard.find('div', class_="street-address")
+            w_dive_adress_sl = findcard.find('div', class_="locality")
+            wo_dive_adress_fl  = w_dive_adress_fl.text
+            wo_dive_adress_sl = w_dive_adress_sl.text
+            full_adress = wo_dive_adress_fl +' ' + wo_dive_adress_sl
+        except:
+            print('no address')
+        try:
+            address.append(full_adress)
+            phone_list.append(wo_div_phone)
+            name_list.append(wo_span_name)
+        except:
+            print('invalidvcard')
 
 #Turning lists into array
 name_array = np.array(name_list)
 phone_array = np.array(phone_list)
+address_array = np.array(address)
 #creating the data frame from the lists
-List_with_none = pd.DataFrame({'name': name_array, 'phone': phone_array }, columns=['name', 'phone'])
+List_with_none = pd.DataFrame({'name': name_array, 'phone': phone_array, 'address' : address_array }, columns=['name', 'phone', 'address'])
 #Removing None Items
 List_with_none['phone'].replace('', np.nan, inplace=True)
 updated_list_complete = List_with_none.dropna(axis = 0, how ='any')
 #Making rows readable
 updated_list_complete.index = updated_list_complete.index + 1
-#exporting to excel
-#print(updated_list_complete)
-updated_list_complete.to_csv(r'c:\File Name.csv')
-
+#exporting to csv
+updated_list_complete.to_csv(r'C:\Users\Michael\Desktop\newfolder\newstorage.csv')
